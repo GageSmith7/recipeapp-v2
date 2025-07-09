@@ -221,6 +221,7 @@ function App() {
           maxWidth: '1200px', 
           margin: '0 auto' 
         }}>
+          {/* App Logo/Title */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
             <div style={{
               width: '50px',
@@ -257,55 +258,75 @@ function App() {
             </div>
           </div>
           
-          <div onClick={() => {setViewProfile(true)}}
-          
-          style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-            <div 
-            onMouseEnter={(e) => {
-              e.target.style.background = 'rgba(255, 255, 255, 0.25)';
-              e.target.style.transform = 'translateY(-1px)';
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.background = 'rgba(255, 255, 255, 0.2)';
-              e.target.style.transform = 'translateY(0)';
-            }}
-            style={{
-              background: 'rgba(255, 255, 255, 0.15)',
-              borderRadius: '12px',
-              padding: '12px 16px',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(255, 255, 255, 0.2)'
-            }}>
-              <div
-              style={{ 
+          {/* Navigation Buttons Container */}
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '16px',
+            background: 'rgba(255, 255, 255, 0.1)',
+            borderRadius: '16px',
+            padding: '8px',
+            backdropFilter: 'blur(10px)',
+            border: '1px solid rgba(255, 255, 255, 0.2)'
+          }}>
+            {/* Profile Button (Welcome Back) */}
+            <button
+              onClick={() => setViewProfile(true)}
+              style={{
+                background: 'rgba(255, 255, 255, 0.15)',
+                borderRadius: '12px',
+                padding: '12px 16px',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                backdropFilter: 'blur(5px)',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'flex-start',
+                gap: '2px'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.background = 'rgba(255, 255, 255, 0.25)';
+                e.target.style.transform = 'translateY(-1px)';
+                e.target.style.boxShadow = '0 4px 12px rgba(255, 255, 255, 0.15)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.background = 'rgba(255, 255, 255, 0.15)';
+                e.target.style.transform = 'translateY(0)';
+                e.target.style.boxShadow = 'none';
+              }}
+            >
+              <div style={{ 
                 color: 'rgba(255, 255, 255, 0.9)',
-                fontSize: '0.85rem',
-                marginBottom: '2px'
+                fontSize: '0.8rem',
+                fontWeight: '400'
               }}>
                 Welcome back
               </div>
               <div style={{
                 color: 'white',
                 fontSize: '0.95rem',
-                fontWeight: '600'
+                fontWeight: '600',
+                whiteSpace: 'nowrap'
               }}>
                 {userProfile?.displayName || user.email.split('@')[0]}
               </div>
-            </div>
+            </button>
 
+            {/* Friends Button */}
             <button
               onClick={() => setViewFriendsRecipes(true)}
               style={{
                 padding: '12px 20px',
                 fontSize: '14px',
                 fontWeight: '600',
-                background: 'rgba(255, 255, 255, 0.2)',
+                background: 'rgba(255, 255, 255, 0.15)',
                 color: 'white',
-                border: '1px solid rgba(255, 255, 255, 0.3)',
-                borderRadius: '10px',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                borderRadius: '12px',
                 cursor: 'pointer',
                 transition: 'all 0.2s ease',
-                backdropFilter: 'blur(10px)',
+                backdropFilter: 'blur(5px)',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px',
@@ -314,10 +335,12 @@ function App() {
               onMouseEnter={(e) => {
                 e.target.style.background = 'rgba(255, 255, 255, 0.25)';
                 e.target.style.transform = 'translateY(-1px)';
+                e.target.style.boxShadow = '0 4px 12px rgba(255, 255, 255, 0.15)';
               }}
               onMouseLeave={(e) => {
-                e.target.style.background = 'rgba(255, 255, 255, 0.2)';
+                e.target.style.background = 'rgba(255, 255, 255, 0.15)';
                 e.target.style.transform = 'translateY(0)';
+                e.target.style.boxShadow = 'none';
               }}
             >
               <span>👥</span>
@@ -345,29 +368,38 @@ function App() {
               )}
             </button>
             
+            {/* Sign Out Button */}
             <button
               onClick={handleLogout}
               style={{
                 padding: '12px 20px',
                 fontSize: '14px',
                 fontWeight: '600',
-                background: 'rgba(255, 255, 255, 0.2)',
+                background: 'rgba(255, 255, 255, 0.15)',
                 color: 'white',
-                border: '1px solid rgba(255, 255, 255, 0.3)',
-                borderRadius: '10px',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                borderRadius: '12px',
                 cursor: 'pointer',
                 transition: 'all 0.2s ease',
-                backdropFilter: 'blur(10px)'
+                backdropFilter: 'blur(5px)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
               }}
               onMouseEnter={(e) => {
-                e.target.style.background = 'rgba(255, 255, 255, 0.25)';
+                e.target.style.background = 'rgba(255, 68, 68, 0.3)';
                 e.target.style.transform = 'translateY(-1px)';
+                e.target.style.boxShadow = '0 4px 12px rgba(239, 68, 68, 0.2)';
+                e.target.style.borderColor = 'rgba(239, 68, 68, 0.3)';
               }}
               onMouseLeave={(e) => {
-                e.target.style.background = 'rgba(255, 255, 255, 0.2)';
+                e.target.style.background = 'rgba(255, 255, 255, 0.15)';
                 e.target.style.transform = 'translateY(0)';
+                e.target.style.boxShadow = 'none';
+                e.target.style.borderColor = 'rgba(255, 255, 255, 0.2)';
               }}
             >
+              <span>🚪</span>
               Sign Out
             </button>
           </div>
