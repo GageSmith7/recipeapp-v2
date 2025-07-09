@@ -59,7 +59,7 @@ export default function RecipeCard({ recipe, onSelect }) {
             {/* Recipe emoji/icon - positioned better */}
             <div style={{
               position: 'absolute',
-              bottom: '3px', // Adjusted for smaller header
+              bottom: '1px', // Adjusted for smaller header
               right: '16px',
               width: '40px', // Slightly smaller
               height: '40px',
@@ -109,34 +109,12 @@ export default function RecipeCard({ recipe, onSelect }) {
                 marginBottom: '10px',
                 flexWrap: 'wrap'
               }}>
-                {/* Privacy Badge - Smaller */}
-                <div style={{
-                  padding: '3px 8px', // Reduced padding
-                  background: recipe.visibility === 'public' 
-                    ? 'linear-gradient(135deg, #10b98118, #059f3e18)'
-                    : 'linear-gradient(135deg, #64748b18, #47556918)',
-                  borderRadius: '12px', // Smaller border radius
-                  fontSize: '0.7rem', // Smaller font
-                  fontWeight: '600',
-                  color: recipe.visibility === 'public' ? '#059669' : '#64748b',
-                  whiteSpace: 'nowrap',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '3px',
-                  border: `1px solid ${recipe.visibility === 'public' ? '#10b98125' : '#64748b25'}`
-                }}>
-                  <span style={{ fontSize: '8px' }}>
-                    {recipe.visibility === 'public' ? '🌍' : '🔒'}
-                  </span>
-                  {recipe.visibility === 'public' ? 'Public' : 'Private'}
-                </div>
-                
                 {/* Category Badge - Smaller */}
                 <div style={{
-                  padding: '3px 10px', // Reduced padding
+                  padding: '4px 11px', // Reduced padding
                   background: `linear-gradient(135deg, ${getRandomGradient(recipe.title)}18, ${getRandomGradient(recipe.title, true)}18)`,
                   borderRadius: '12px', // Smaller border radius
-                  fontSize: '0.7rem', // Smaller font
+                  fontSize: '.8rem', // Smaller font
                   fontWeight: '600',
                   color: getRandomGradient(recipe.title),
                   whiteSpace: 'nowrap',
@@ -286,7 +264,8 @@ function getCategoryEmoji(category) {
     lunch: '🥙', 
     dinner: '🍽️',
     snack: '🍿',
-    dessert: '🍰'
+    dessert: '🍰',
+    cocktail: '🍸'
   };
   return categoryMap[category] || '🍽️';
 }
@@ -298,7 +277,8 @@ function getCategoryLabel(category) {
     lunch: 'Lunch',
     dinner: 'Dinner', 
     snack: 'Snack',
-    dessert: 'Dessert'
+    dessert: 'Dessert',
+    cocktail: 'Cocktail'
   };
   return labelMap[category] || 'Dinner';
 }

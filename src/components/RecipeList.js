@@ -17,7 +17,6 @@ const RecipeList = ({ user, onSelectRecipe }) => {
   const [filters, setFilters] = useState({
     category: 'all',
     ingredientCount: 'all',
-    viewable: 'all'
   });
   const [showFilters, setShowFilters] = useState(false);
 
@@ -114,13 +113,6 @@ const RecipeList = ({ user, onSelectRecipe }) => {
       }
     }
     
-    // visibility filter
-    if (filters.viewable !== 'all') {
-      const isPublic = recipe.visibility && recipe.visibility === 'public';
-      if (filters.viewable === 'yes' && !isPublic) return false;
-      if (filters.viewable === 'no' && isPublic) return false;
-    }
-    
     return true;
   });
 
@@ -149,15 +141,13 @@ const RecipeList = ({ user, onSelectRecipe }) => {
   const resetFilters = () => {
     setFilters({
       category: 'all',
-      ingredientCount: 'all',
-      viewable: 'all'
+      ingredientCount: 'all'
     });
   };
 
   // Check if any filters are active
   const hasActiveFilters = filters.category !== 'all' || 
-                          filters.ingredientCount !== 'all' || 
-                          filters.viewable !== 'all';
+                          filters.ingredientCount !== 'all'
 
   if (loading) {
     return (
@@ -644,38 +634,7 @@ const RecipeList = ({ user, onSelectRecipe }) => {
               </div>
 
               {/* Instructions Filter */}
-              <div>
-                <label style={{
-                  display: 'block',
-                  fontSize: '0.9rem',
-                  fontWeight: '600',
-                  color: '#374151',
-                  marginBottom: '8px'
-                }}>
-                  📋 Public or Private
-                </label>
-                <select
-                  value={filters.viewable}
-                  onChange={(e) => setFilters(prev => ({ ...prev, viewable: e.target.value }))}
-                  style={{
-                    width: '100%',
-                    padding: '10px 12px',
-                    border: '2px solid #e2e8f0',
-                    borderRadius: '8px',
-                    fontSize: '0.9rem',
-                    background: 'white',
-                    cursor: 'pointer',
-                    outline: 'none',
-                    transition: 'border-color 0.2s ease'
-                  }}
-                  onFocus={(e) => e.target.style.borderColor = '#667eea'}
-                  onBlur={(e) => e.target.style.borderColor = '#e2e8f0'}
-                >
-                  <option value="all">All Recipes</option>
-                  <option value="yes">Public Recipes</option>
-                  <option value="no">Private Recipes</option>
-                </select>
-              </div>
+
             </div>
           )}
         </div>

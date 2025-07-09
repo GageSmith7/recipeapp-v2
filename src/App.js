@@ -1,26 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import { onAuthStateChanged, signOut } from 'firebase/auth';
-import { doc, getDoc } from 'firebase/firestore';
+import { doc, getDoc, collection, query, where, onSnapshot } from 'firebase/firestore';
 import { auth, db } from './firebase/config';
 import Auth from './components/Auth';
 import RecipeManager from './components/RecipeManager';
 import ProfileSetup from './components/ProfileSetup';
-import RecipeColab from './components/RecipeColab';
+import FriendsRecipes from './components/FriendsRecipes';
 import './App.css';
+import ProfileSettings from './components/ProfileSettings';
 
 function App() {
   const [user, setUser] = useState(null);
   const [userProfile, setUserProfile] = useState(null);
   const [needsProfileSetup, setNeedsProfileSetup] = useState(false);
-  const [colab, setColab] = useState(false);
+  const [viewFriendsRecipes, setViewFriendsRecipes] = useState(false);
+  const [viewProfile, setViewProfile] = useState(false)
   const [loading, setLoading] = useState(true);
+  const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
 
   // Check if user has a profile
   const checkUserProfile = async (uid) => {
     try {
       const profileDoc = await getDoc(doc(db, 'userProfiles', uid));
       if (profileDoc.exists()) {
-        setUserProfile(profileDoc.data());
+        const profileData = profileDoc.data();
+        // Add default isPublic field if it doesn't exist (for existing users)
+        if (profileData.isPublic === undefined) {
+          profileData.isPublic = false; // Default to private
+        }
+        setUserProfile(profileData);
         setNeedsProfileSetup(false);
       } else {
         setUserProfile(null);
@@ -42,6 +50,7 @@ function App() {
       } else {
         setUserProfile(null);
         setNeedsProfileSetup(false);
+        setPendingRequestsCount(0);
       }
       
       setLoading(false);
@@ -49,6 +58,29 @@ function App() {
 
     return () => unsubscribe();
   }, []);
+
+  // Listen for pending follow requests
+  useEffect(() => {
+    if (!user) {
+      setPendingRequestsCount(0);
+      return;
+    }
+
+    const pendingQuery = query(
+      collection(db, 'follows'),
+      where('followingId', '==', user.uid),
+      where('status', '==', 'pending')
+    );
+
+    const unsubscribe = onSnapshot(pendingQuery, (snapshot) => {
+      setPendingRequestsCount(snapshot.size);
+    }, (error) => {
+      console.error('Error listening to pending requests:', error);
+      setPendingRequestsCount(0);
+    });
+
+    return () => unsubscribe();
+  }, [user]);
 
   const handleProfileCreated = (profileData) => {
     setUserProfile(profileData);
@@ -64,16 +96,25 @@ function App() {
     }
   };
 
-  const handleBackToList = () => {setColab(false)};
+  const handleBackToRecipes = () => {
+    setViewFriendsRecipes(false);
+    setViewProfile(false);
+  };
 
-  if (colab) {
-    return (
-      <RecipeColab 
-      onBack={handleBackToList}
-      user={user}
-      userProfile={userProfile}/>
-    );
-  }
+  const handleProfileUpdated = (updatedProfile) => {
+    setUserProfile(updatedProfile);
+    console.log('Profile updated:', updatedProfile);
+  };
+  
+  const handleAccountDeleted = () => {
+    // Clear all state
+    setUser(null);
+    setUserProfile(null);
+    setNeedsProfileSetup(false);
+    setViewFriendsRecipes(false);
+    console.log('Account deleted - user signed out');
+    // The user will automatically be redirected to Auth component since user is null
+  };
 
   if (loading) {
     return (
@@ -114,6 +155,33 @@ function App() {
     return <ProfileSetup user={user} onProfileCreated={handleProfileCreated} />;
   }
 
+  if (viewProfile) {
+    return (
+      <div className="App" style={{ minHeight: '100vh', backgroundColor: '#f8fafc' }}>
+        <ProfileSettings
+          user={user}
+          userProfile={userProfile}
+          onBack={handleBackToRecipes}
+          onProfileUpdated={handleProfileUpdated}
+          onAccountDeleted={handleAccountDeleted}
+        />
+      </div>
+    );
+  }
+
+  // Show Friends Recipes page
+  if (viewFriendsRecipes) {
+    return (
+      <div className="App" style={{ minHeight: '100vh', backgroundColor: '#f8fafc' }}>
+        <FriendsRecipes 
+          user={user}
+          userProfile={userProfile}
+          onBack={handleBackToRecipes}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="App" style={{ minHeight: '100vh', backgroundColor: '#f8fafc' }}>
       {/* Enhanced App Header */}
@@ -147,64 +215,72 @@ function App() {
           position: 'relative',
           zIndex: 10,
           padding: '25px 30px',
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center', 
           maxWidth: '1200px', 
-          margin: '0 auto'
-        }} className="header-content">
-          {/* Top row with logo and welcome message */}
-          <div style={{
-            display: 'flex', 
-            justifyContent: 'space-between', 
-            alignItems: 'center',
-            marginBottom: '0'
-          }} className="header-top-row">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-              <div style={{
-                width: '50px',
-                height: '50px',
-                background: 'rgba(255, 255, 255, 0.2)',
-                borderRadius: '15px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '24px',
-                backdropFilter: 'blur(10px)',
-                border: '1px solid rgba(255, 255, 255, 0.3)'
-              }}>
-                🍳
-              </div>
-              <div>
-                <h1 style={{ 
-                  margin: 0, 
-                  color: 'white',
-                  fontSize: '2.2rem',
-                  fontWeight: '700',
-                  textShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                }} className="app-title">
-                  MyRecipeJar
-                </h1>
-                <p style={{
-                  margin: 0,
-                  color: 'rgba(255, 255, 255, 0.8)',
-                  fontSize: '0.9rem',
-                  fontWeight: '400'
-                }} className="app-subtitle">
-                  Your personal recipe collection
-                </p>
-              </div>
-            </div>
-            
-            {/* Welcome message - hidden on mobile */}
+          margin: '0 auto' 
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
             <div style={{
+              width: '50px',
+              height: '50px',
+              background: 'rgba(255, 255, 255, 0.2)',
+              borderRadius: '15px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: '24px',
+              backdropFilter: 'blur(10px)',
+              border: '1px solid rgba(255, 255, 255, 0.3)'
+            }}>
+              🍳
+            </div>
+            <div>
+              <h1 style={{ 
+                margin: 0, 
+                color: 'white',
+                fontSize: '2.2rem',
+                fontWeight: '700',
+                textShadow: '0 2px 4px rgba(0,0,0,0.1)'
+              }}>
+                MyRecipeJar
+              </h1>
+              <p style={{
+                margin: 0,
+                color: 'rgba(255, 255, 255, 0.8)',
+                fontSize: '0.9rem',
+                fontWeight: '400'
+              }}>
+                Your personal recipe collection
+              </p>
+            </div>
+          </div>
+          
+          <div onClick={() => {setViewProfile(true)}}
+          
+          style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+            <div 
+            onMouseEnter={(e) => {
+              e.target.style.background = 'rgba(255, 255, 255, 0.25)';
+              e.target.style.transform = 'translateY(-1px)';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.background = 'rgba(255, 255, 255, 0.2)';
+              e.target.style.transform = 'translateY(0)';
+            }}
+            style={{
               background: 'rgba(255, 255, 255, 0.15)',
               borderRadius: '12px',
               padding: '12px 16px',
               backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-            }} className="welcome-message">
-              <div style={{ 
+              border: '1px solid rgba(255, 255, 255, 0.2)'
+            }}>
+              <div
+              style={{ 
                 color: 'rgba(255, 255, 255, 0.9)',
                 fontSize: '0.85rem',
-                marginBottom: '2px',
+                marginBottom: '2px'
               }}>
                 Welcome back
               </div>
@@ -216,18 +292,9 @@ function App() {
                 {userProfile?.displayName || user.email.split('@')[0]}
               </div>
             </div>
-          </div>
 
-          {/* Action buttons row */}
-          <div style={{
-            padding: '12px 16px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '15px',
-            justifyContent: 'flex-start'
-          }} className="header-buttons">
             <button
-              onClick={() => setColab(true)}
+              onClick={() => setViewFriendsRecipes(true)}
               style={{
                 padding: '12px 20px',
                 fontSize: '14px',
@@ -239,9 +306,11 @@ function App() {
                 cursor: 'pointer',
                 transition: 'all 0.2s ease',
                 backdropFilter: 'blur(10px)',
-                minWidth: '80px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                position: 'relative'
               }}
-              className="header-button"
               onMouseEnter={(e) => {
                 e.target.style.background = 'rgba(255, 255, 255, 0.25)';
                 e.target.style.transform = 'translateY(-1px)';
@@ -251,7 +320,29 @@ function App() {
                 e.target.style.transform = 'translateY(0)';
               }}
             >
+              <span>👥</span>
               Friends
+              {/* Notification Badge */}
+              {pendingRequestsCount > 0 && (
+                <div style={{
+                  position: 'absolute',
+                  top: '-6px',
+                  right: '-6px',
+                  width: '18px',
+                  height: '18px',
+                  background: '#ef4444',
+                  borderRadius: '50%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '11px',
+                  fontWeight: '700',
+                  color: 'white',
+                  border: '2px solid white'
+                }}>
+                  {pendingRequestsCount > 9 ? '9+' : pendingRequestsCount}
+                </div>
+              )}
             </button>
             
             <button
@@ -266,10 +357,8 @@ function App() {
                 borderRadius: '10px',
                 cursor: 'pointer',
                 transition: 'all 0.2s ease',
-                backdropFilter: 'blur(10px)',
-                minWidth: '80px',
+                backdropFilter: 'blur(10px)'
               }}
-              className="header-button"
               onMouseEnter={(e) => {
                 e.target.style.background = 'rgba(255, 255, 255, 0.25)';
                 e.target.style.transform = 'translateY(-1px)';
@@ -295,7 +384,7 @@ function App() {
         <RecipeManager user={user} userProfile={userProfile} />
       </main>
       
-      {/* Add some global styles */}
+      {/* Add CSS animations */}
       <style>{`
         @keyframes spin {
           0% { transform: rotate(0deg); }

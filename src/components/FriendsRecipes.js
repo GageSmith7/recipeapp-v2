@@ -3,13 +3,15 @@ import { collection, query, where, orderBy, onSnapshot, getDocs } from 'firebase
 import { db } from '../firebase/config';
 import RecipeCard from './RecipeCard';
 import RecipeDetail from './RecipeDetail';
+import FriendManagement from './FriendManagement';
 
 const FriendsRecipes = ({ user, userProfile, onBack }) => {
   const [friendsRecipes, setFriendsRecipes] = useState([]);
-  const [friends, setFriends] = useState([]);
+  const [followingUsers, setFollowingUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedRecipe, setSelectedRecipe] = useState(null);
+  const [showFriendManagement, setShowFriendManagement] = useState(false);
   
   // Filter states
   const [filters, setFilters] = useState({
@@ -21,41 +23,43 @@ const FriendsRecipes = ({ user, userProfile, onBack }) => {
   useEffect(() => {
     if (!user) return;
 
-    const loadFriendsAndRecipes = async () => {
+    const loadFollowingAndRecipes = async () => {
       try {
-        // First, get all friends
-        const friendsQuery = query(
-          collection(db, 'friends'),
-          where('users', 'array-contains', user.uid)
+        // First, get all users I'm following
+        const followingQuery = query(
+          collection(db, 'follows'),
+          where('followerId', '==', user.uid),
+          where('status', '==', 'active')
         );
         
-        const friendsSnapshot = await getDocs(friendsQuery);
-        const friendsList = [];
-        const friendUserIds = [];
+        const followingSnapshot = await getDocs(followingQuery);
+        const followingList = [];
+        const followingUserIds = [];
         
-        friendsSnapshot.forEach((doc) => {
+        followingSnapshot.forEach((doc) => {
           const data = doc.data();
-          const otherUserId = data.users.find(id => id !== user.uid);
-          const otherUserInfo = data.userInfo.find(info => info.uid !== user.uid);
+          const followingUserInfo = {
+            uid: data.followingId,
+            email: data.followingEmail,
+            displayName: data.followingDisplayName
+          };
           
-          if (otherUserInfo) {
-            friendsList.push(otherUserInfo);
-            friendUserIds.push(otherUserId);
-          }
+          followingList.push(followingUserInfo);
+          followingUserIds.push(data.followingId);
         });
         
-        setFriends(friendsList);
+        setFollowingUsers(followingList);
 
-        if (friendUserIds.length === 0) {
+        if (followingUserIds.length === 0) {
           setLoading(false);
           return;
         }
 
-        // Then, get all public recipes from friends
+        // Then, get all recipes from users I'm following
+        // Note: We no longer filter by visibility since we removed that from recipes
         const recipesQuery = query(
           collection(db, 'recipes'),
-          where('createdBy', 'in', friendUserIds),
-          where('visibility', '==', 'public'),
+          where('createdBy', 'in', followingUserIds),
           orderBy('createdAt', 'desc')
         );
 
@@ -65,7 +69,7 @@ const FriendsRecipes = ({ user, userProfile, onBack }) => {
             const recipeData = { id: doc.id, ...doc.data() };
             
             // Add creator info to recipe
-            const creator = friendsList.find(friend => friend.uid === recipeData.createdBy);
+            const creator = followingList.find(friend => friend.uid === recipeData.createdBy);
             if (creator) {
               recipeData.creatorInfo = creator;
             }
@@ -84,13 +88,13 @@ const FriendsRecipes = ({ user, userProfile, onBack }) => {
         return () => unsubscribe();
         
       } catch (error) {
-        console.error('Error loading friends and recipes:', error);
+        console.error('Error loading following and recipes:', error);
         setError('Failed to load friends\' recipes');
         setLoading(false);
       }
     };
 
-    loadFriendsAndRecipes();
+    loadFollowingAndRecipes();
   }, [user]);
 
   // Filter recipes based on current filters
@@ -118,6 +122,26 @@ const FriendsRecipes = ({ user, userProfile, onBack }) => {
 
   // Check if any filters are active
   const hasActiveFilters = filters.category !== 'all' || filters.friend !== 'all';
+
+  // Handle manage friends navigation
+  const handleManageFriends = () => {
+    setShowFriendManagement(true);
+  };
+
+  const handleBackFromManagement = () => {
+    setShowFriendManagement(false);
+  };
+
+  // Show Friend Management page
+  if (showFriendManagement) {
+    return (
+      <FriendManagement 
+        user={user}
+        userProfile={userProfile}
+        onBack={handleBackFromManagement}
+      />
+    );
+  }
 
   // Show individual recipe details
   if (selectedRecipe) {
@@ -231,6 +255,43 @@ const FriendsRecipes = ({ user, userProfile, onBack }) => {
         >
           <span>←</span> Back
         </button>
+
+        {/* Manage Friends button */}
+        <button
+          onClick={handleManageFriends}
+          style={{
+            position: 'relative',
+            zIndex: 10,
+            padding: '12px 24px',
+            marginBottom: '30px',
+            marginLeft: '12px',
+            background: 'rgba(255, 255, 255, 0.25)',
+            color: 'white',
+            border: '1px solid rgba(255, 255, 255, 0.4)',
+            borderRadius: '10px',
+            cursor: 'pointer',
+            fontSize: '14px',
+            fontWeight: '600',
+            transition: 'all 0.2s ease',
+            backdropFilter: 'blur(10px)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px',
+            boxShadow: '0 4px 12px rgba(255, 255, 255, 0.1)'
+          }}
+          onMouseEnter={(e) => {
+            e.target.style.background = 'rgba(255, 255, 255, 0.35)';
+            e.target.style.transform = 'translateY(-1px)';
+            e.target.style.boxShadow = '0 6px 16px rgba(255, 255, 255, 0.15)';
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.background = 'rgba(255, 255, 255, 0.25)';
+            e.target.style.transform = 'translateY(0)';
+            e.target.style.boxShadow = '0 4px 12px rgba(255, 255, 255, 0.1)';
+          }}
+        >
+          <span>👥</span> Manage Friends
+        </button>
         
         {/* Title */}
         <div style={{ position: 'relative', zIndex: 10 }}>
@@ -250,7 +311,7 @@ const FriendsRecipes = ({ user, userProfile, onBack }) => {
             margin: 0,
             fontWeight: '400'
           }}>
-            Discover and enjoy public recipes shared by your friends
+            Discover and enjoy recipes shared by people you follow
           </p>
         </div>
       </div>
@@ -276,8 +337,8 @@ const FriendsRecipes = ({ user, userProfile, onBack }) => {
           </div>
         )}
 
-        {/* No Friends State */}
-        {friends.length === 0 && !loading && (
+        {/* No Following State */}
+        {followingUsers.length === 0 && !loading && (
           <div style={{
             display: 'flex',
             flexDirection: 'column',
@@ -306,7 +367,7 @@ const FriendsRecipes = ({ user, userProfile, onBack }) => {
                 fontWeight: '700',
                 margin: '0 0 12px 0'
               }}>
-                No friends yet!
+                You're not following anyone yet!
               </h3>
               <p style={{
                 color: '#64748b',
@@ -314,14 +375,14 @@ const FriendsRecipes = ({ user, userProfile, onBack }) => {
                 lineHeight: '1.6',
                 margin: 0
               }}>
-                Start by finding friends to connect with. Once you're connected, their public recipes will appear here for you to discover and enjoy!
+                Start by finding people to follow. Once you follow them, their recipes will appear here for you to discover and enjoy!
               </p>
             </div>
           </div>
         )}
 
         {/* No Recipes State */}
-        {friends.length > 0 && friendsRecipes.length === 0 && !loading && (
+        {followingUsers.length > 0 && friendsRecipes.length === 0 && !loading && (
           <div style={{
             display: 'flex',
             flexDirection: 'column',
@@ -350,7 +411,7 @@ const FriendsRecipes = ({ user, userProfile, onBack }) => {
                 fontWeight: '700',
                 margin: '0 0 12px 0'
               }}>
-                No public recipes yet
+                No recipes yet
               </h3>
               <p style={{
                 color: '#64748b',
@@ -358,7 +419,7 @@ const FriendsRecipes = ({ user, userProfile, onBack }) => {
                 lineHeight: '1.6',
                 margin: 0
               }}>
-                Your friends haven't shared any public recipes yet. Encourage them to mark some recipes as "Public" to share their culinary creations with you!
+                The people you follow haven't shared any recipes yet. Encourage them to start sharing their culinary creations!
               </p>
             </div>
           </div>
@@ -489,7 +550,7 @@ const FriendsRecipes = ({ user, userProfile, onBack }) => {
                     </select>
                   </div>
 
-                  {/* Friend Filter */}
+                  {/* Creator Filter */}
                   <div>
                     <label style={{
                       display: 'block',
@@ -517,8 +578,8 @@ const FriendsRecipes = ({ user, userProfile, onBack }) => {
                       onFocus={(e) => e.target.style.borderColor = '#10b981'}
                       onBlur={(e) => e.target.style.borderColor = '#e2e8f0'}
                     >
-                      <option value="all">All Friends</option>
-                      {friends.map((friend) => (
+                      <option value="all">All People</option>
+                      {followingUsers.map((friend) => (
                         <option key={friend.uid} value={friend.uid}>
                           {friend.displayName}
                         </option>
@@ -562,8 +623,8 @@ const FriendsRecipes = ({ user, userProfile, onBack }) => {
                   margin: 0
                 }}>
                   {hasActiveFilters 
-                    ? 'Filtered results from your friends' 
-                    : `Shared by ${friends.length} ${friends.length === 1 ? 'friend' : 'friends'}`
+                    ? 'Filtered results from your network' 
+                    : `Shared by ${followingUsers.length} ${followingUsers.length === 1 ? 'person' : 'people'} you follow`
                   }
                 </p>
               </div>

@@ -7,7 +7,6 @@ const RecipeForm = ({ user, recipe, onCancel, onSave }) => {
   const [ingredients, setIngredients] = useState('');
   const [instructions, setInstructions] = useState('');
   const [category, setCategory] = useState('dinner');
-  const [visibility, setVisibility] = useState('private');
   const [servingSize, setServingSize] = useState('1');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -40,7 +39,6 @@ const RecipeForm = ({ user, recipe, onCancel, onSave }) => {
       setIngredients(recipe.ingredients ? recipe.ingredients.join('\n') : '');
       setInstructions(recipe.instructions || '');
       setCategory(recipe.category || 'dinner');
-      setVisibility(recipe.visibility || 'private');
       setServingSize(recipe.servingSize || '1');
     }
   }, [recipe]);
@@ -149,7 +147,6 @@ const RecipeForm = ({ user, recipe, onCancel, onSave }) => {
           ingredients: ingredientArray,
           instructions: instructions.trim(),
           category: category,
-          visibility: visibility,
           servingSize: servingSize,
           updatedAt: serverTimestamp()
         };
@@ -163,7 +160,6 @@ const RecipeForm = ({ user, recipe, onCancel, onSave }) => {
           ingredients: ingredientArray,
           instructions: instructions.trim(),
           category: category,
-          visibility: visibility,
           servingSize: servingSize,
           createdBy: user.uid,
           createdAt: serverTimestamp()
@@ -178,7 +174,6 @@ const RecipeForm = ({ user, recipe, onCancel, onSave }) => {
       setIngredients('');
       setInstructions('');
       setCategory('dinner');
-      setVisibility('private');
       setServingSize('1');
       
       if (onSave) onSave();
@@ -383,133 +378,6 @@ const RecipeForm = ({ user, recipe, onCancel, onSave }) => {
               <span style={{ color: '#10b981', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '4px' }}>
                 <span>✅</span> {mealCategories.find(cat => cat.value === category)?.label} selected
               </span>
-            </div>
-          </div>
-
-          {/* Visibility/Privacy Field */}
-          <div style={{ marginBottom: '32px' }}>
-            <label style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              marginBottom: '12px',
-              fontSize: '1.1rem',
-              fontWeight: '600',
-              color: '#1a202c'
-            }}>
-              <span>{visibility === 'public' ? '🌍' : '🔒'}</span>
-              Recipe Visibility
-            </label>
-            
-            <div style={{
-              background: '#f8fafc',
-              borderRadius: '12px',
-              padding: '20px',
-              border: '1px solid #e2e8f0'
-            }}>
-              {/* Toggle Switch */}
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                marginBottom: '16px'
-              }}>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px'
-                }}>
-                  <span style={{ fontSize: '20px' }}>
-                    {visibility === 'public' ? '🌍' : '🔒'}
-                  </span>
-                  <div>
-                    <div style={{
-                      fontSize: '1rem',
-                      fontWeight: '600',
-                      color: '#1a202c',
-                      marginBottom: '2px'
-                    }}>
-                      {visibility === 'public' ? 'Public Recipe' : 'Private Recipe'}
-                    </div>
-                    <div style={{
-                      fontSize: '0.85rem',
-                      color: '#64748b'
-                    }}>
-                      {visibility === 'public' 
-                        ? 'Visible to your friends and collaborators' 
-                        : 'Only visible to you'
-                      }
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Custom Toggle Switch */}
-                <button
-                  type="button"
-                  onClick={() => setVisibility(visibility === 'public' ? 'private' : 'public')}
-                  style={{
-                    width: '60px',
-                    height: '32px',
-                    borderRadius: '16px',
-                    border: 'none',
-                    background: visibility === 'public' 
-                      ? 'linear-gradient(135deg, #667eea, #764ba2)' 
-                      : 'linear-gradient(135deg, #cbd5e1, #94a3b8)',
-                    position: 'relative',
-                    cursor: 'pointer',
-                    transition: 'all 0.3s ease',
-                    boxShadow: visibility === 'public'
-                      ? '0 4px 12px rgba(102, 126, 234, 0.3)'
-                      : '0 2px 6px rgba(0, 0, 0, 0.1)'
-                  }}
-                >
-                  <div style={{
-                    width: '24px',
-                    height: '24px',
-                    borderRadius: '12px',
-                    background: 'white',
-                    position: 'absolute',
-                    top: '4px',
-                    left: visibility === 'public' ? '32px' : '4px',
-                    transition: 'left 0.3s ease',
-                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '10px'
-                  }}>
-                    {visibility === 'public' ? '🌍' : '🔒'}
-                  </div>
-                </button>
-              </div>
-
-              
-              
-              {/* Additional Info */}
-              <div style={{
-                background: visibility === 'public' 
-                  ? 'linear-gradient(135deg, #667eea10, #764ba210)' 
-                  : 'linear-gradient(135deg, #f1f5f910, #e2e8f010)',
-                borderRadius: '8px',
-                padding: '12px',
-                border: `1px solid ${visibility === 'public' ? '#667eea30' : '#e2e8f0'}`
-              }}>
-                <div style={{
-                  fontSize: '0.85rem',
-                  color: '#64748b',
-                  lineHeight: '1.4'
-                }}>
-                  {visibility === 'public' ? (
-                    <>
-                      <strong style={{ color: '#667eea' }}>Public recipes</strong> can be seen by friends you've connected with and in any collaborations you join. You can change this anytime.
-                    </>
-                  ) : (
-                    <>
-                      <strong style={{ color: '#64748b' }}>Private recipes</strong> are only visible in your personal recipe collection. Perfect for family secrets or works in progress!
-                    </>
-                  )}
-                </div>
-              </div>
             </div>
           </div>
 
