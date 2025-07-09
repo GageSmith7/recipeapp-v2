@@ -211,16 +211,20 @@ function App() {
           borderRadius: '50%'
         }} />
         
-        <div style={{ 
-          position: 'relative',
-          zIndex: 10,
-          padding: '25px 30px',
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          alignItems: 'center', 
-          maxWidth: '1200px', 
-          margin: '0 auto' 
-        }}>
+        <div 
+          className="header-container"
+          style={{ 
+            position: 'relative',
+            zIndex: 10,
+            padding: '25px 30px',
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center', 
+            maxWidth: '1200px', 
+            margin: '0 auto',
+            flexWrap: 'wrap',
+            gap: '20px'
+          }}>
           {/* App Logo/Title */}
           <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
             <div style={{
@@ -259,16 +263,18 @@ function App() {
           </div>
           
           {/* Navigation Buttons Container */}
-          <div style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            gap: '16px',
-            background: 'rgba(255, 255, 255, 0.1)',
-            borderRadius: '16px',
-            padding: '8px',
-            backdropFilter: 'blur(10px)',
-            border: '1px solid rgba(255, 255, 255, 0.2)'
-          }}>
+          <div 
+            className="nav-buttons"
+            style={{ 
+              display: 'flex', 
+              alignItems: 'center', 
+              gap: '16px',
+              background: 'rgba(255, 255, 255, 0.1)',
+              borderRadius: '16px',
+              padding: '8px',
+              backdropFilter: 'blur(10px)',
+              border: '1px solid rgba(255, 255, 255, 0.2)'
+            }}>
             {/* Profile Button (Welcome Back) */}
             <button
               onClick={() => setViewProfile(true)}
@@ -421,6 +427,40 @@ function App() {
         @keyframes spin {
           0% { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
+        }
+        
+        /* Responsive navigation */
+        @media (max-width: 768px) {
+          .header-container {
+            flex-direction: column !important;
+            align-items: center !important;
+            gap: 24px !important;
+            text-align: center;
+          }
+          
+          .nav-buttons {
+            width: 100% !important;
+            justify-content: center !important;
+            flex-wrap: wrap !important;
+          }
+          
+          .nav-buttons button {
+            flex: 1;
+            min-width: 120px;
+            max-width: 180px;
+          }
+        }
+        
+        @media (max-width: 580px) {
+          .nav-buttons {
+            flex-direction: column !important;
+            width: 100% !important;
+          }
+          
+          .nav-buttons button {
+            width: 100% !important;
+            max-width: none !important;
+          }
         }
         
         * {
