@@ -1,9 +1,9 @@
-// firebase/config.js - Updated with environment variables
+// firebase/config.js - Updated with Firebase Storage
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
-
+import { getStorage } from "firebase/storage";
 
 // Your web app's Firebase configuration using environment variables
 const firebaseConfig = {
@@ -23,5 +23,6 @@ const analytics = getAnalytics(app);
 // Initialize Firebase services
 export const auth = getAuth(app);
 export const db = getFirestore(app);
+export const storage = getStorage(app); // Add Firebase Storage
 
 export default app;

@@ -49,7 +49,8 @@ const RecipeDetail = ({ recipe, onBack, onEdit, user, readOnly }) => {
             category: recipe.category,
             visibility: 'private', // Default duplicates to private
             createdBy: user.uid,
-            createdAt: serverTimestamp()
+            createdAt: serverTimestamp(),
+            photo: recipe.photo
         };
 
         await addDoc(collection(db, 'recipes'), duplicateRecipe);
@@ -120,34 +121,50 @@ const RecipeDetail = ({ recipe, onBack, onEdit, user, readOnly }) => {
 
   const primaryColor = getRecipeColor(recipe.title);
 
+  // Check if recipe has a photo
+  const hasPhoto = recipe.photo && recipe.photo.downloadURL;
+
   return (
     <div style={{ position: 'relative' }}>
-      {/* Hero Header Section */}
+      {/* Hero Header Section with Photo Background */}
       <div style={{
-        background: `linear-gradient(135deg, ${primaryColor} 0%, ${primaryColor}dd 100%)`,
-        padding: '40px 40px 60px 40px',
+        background: hasPhoto 
+          ? `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.3)), url(${recipe.photo.downloadURL})`
+          : `linear-gradient(135deg, ${primaryColor} 0%, ${primaryColor}dd 100%)`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        padding: '40px 40px 80px 40px',
         position: 'relative',
-        overflow: 'hidden'
+        overflow: 'hidden',
+        minHeight: hasPhoto ? '400px' : 'auto',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: hasPhoto ? 'space-between' : 'flex-start'
       }}>
-        {/* Background decorations */}
-        <div style={{
-          position: 'absolute',
-          top: '-100px',
-          right: '-100px',
-          width: '200px',
-          height: '200px',
-          background: 'rgba(255, 255, 255, 0.1)',
-          borderRadius: '50%'
-        }} />
-        <div style={{
-          position: 'absolute',
-          bottom: '-50px',
-          left: '-50px',
-          width: '150px',
-          height: '150px',
-          background: 'rgba(255, 255, 255, 0.05)',
-          borderRadius: '50%'
-        }} />
+        {/* Background decorations (only show if no photo) */}
+        {!hasPhoto && (
+          <>
+            <div style={{
+              position: 'absolute',
+              top: '-100px',
+              right: '-100px',
+              width: '200px',
+              height: '200px',
+              background: 'rgba(255, 255, 255, 0.1)',
+              borderRadius: '50%'
+            }} />
+            <div style={{
+              position: 'absolute',
+              bottom: '-50px',
+              left: '-50px',
+              width: '150px',
+              height: '150px',
+              background: 'rgba(255, 255, 255, 0.05)',
+              borderRadius: '50%'
+            }} />
+          </>
+        )}
         
         {/* Back button */}
         <button
@@ -156,7 +173,7 @@ const RecipeDetail = ({ recipe, onBack, onEdit, user, readOnly }) => {
             position: 'relative',
             zIndex: 10,
             padding: '12px 20px',
-            marginBottom: '30px',
+            marginBottom: hasPhoto ? '0' : '30px',
             background: 'rgba(255, 255, 255, 0.2)',
             color: 'white',
             border: '1px solid rgba(255, 255, 255, 0.3)',
@@ -168,7 +185,8 @@ const RecipeDetail = ({ recipe, onBack, onEdit, user, readOnly }) => {
             backdropFilter: 'blur(10px)',
             display: 'flex',
             alignItems: 'center',
-            gap: '8px'
+            gap: '8px',
+            alignSelf: 'flex-start'
           }}
           onMouseEnter={(e) => {
             e.target.style.background = 'rgba(255, 255, 255, 0.25)';
@@ -180,80 +198,59 @@ const RecipeDetail = ({ recipe, onBack, onEdit, user, readOnly }) => {
           <span>←</span> Back to Recipes
         </button>
 
-        {/* Recipe title and meta */}
-        <div style={{ position: 'relative', zIndex: 10 }}>
+        {/* Recipe title only - positioned at bottom if photo exists */}
+        <div style={{ 
+          position: 'relative', 
+          zIndex: 10,
+          marginTop: hasPhoto ? 'auto' : '0'
+        }}>
+          {/* Just the title now */}
+          <h1 style={{
+            color: 'white',
+            fontSize: hasPhoto ? '3.5rem' : '3rem',
+            fontWeight: '800',
+            margin: 0,
+            textShadow: hasPhoto 
+              ? '0 4px 8px rgba(0,0,0,0.8), 0 2px 4px rgba(0,0,0,0.5)' 
+              : '0 2px 4px rgba(0,0,0,0.2)',
+            lineHeight: '1.1'
+          }}>
+            {recipe.title}
+          </h1>
+        </div>
+      </div>
+
+      {/* Content Section */}
+      <div style={{ padding: '40px' }}>
+        {/* Recipe Metadata Tags - moved here from header */}
+        <div style={{
+          background: 'white',
+          borderRadius: '16px',
+          padding: '24px',
+          marginBottom: '40px',
+          border: '1px solid #e2e8f0',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.05)'
+        }}>
           <div style={{
             display: 'flex',
-            alignItems: 'flex-start',
-            justifyContent: 'space-between',
-            marginBottom: '20px',
-            gap: '20px'
+            gap: '16px',
+            flexWrap: 'wrap',
+            justifyContent: 'center'
           }}>
-            <h1 style={{
-              color: 'white',
-              fontSize: '3rem',
-              fontWeight: '800',
-              margin: 0,
-              textShadow: '0 2px 4px rgba(0,0,0,0.2)',
-              lineHeight: '1.1',
-              flex: 1
-            }}>
-              {recipe.title}
-            </h1>
-            
-            {/* Privacy Status Badge */}
             <div style={{
-              background: 'rgba(255, 255, 255, 0.25)',
-              padding: '12px 20px',
+              background: `linear-gradient(135deg, ${primaryColor}15, ${primaryColor}10)`,
+              padding: '16px 24px',
               borderRadius: '12px',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(255, 255, 255, 0.3)',
+              border: `1px solid ${primaryColor}25`,
               display: 'flex',
+              flexDirection: 'column',
               alignItems: 'center',
-              gap: '8px',
-              whiteSpace: 'nowrap'
+              minWidth: '120px'
             }}>
-              <span style={{ fontSize: '18px' }}>
-                {recipe.visibility === 'public' ? '🌍' : '🔒'}
-              </span>
-              <div>
-                <div style={{ 
-                  color: 'white', 
-                  fontSize: '0.9rem', 
-                  fontWeight: '600',
-                  marginBottom: '2px'
-                }}>
-                  {recipe.visibility === 'public' ? 'Public Recipe' : 'Private Recipe'}
-                </div>
-                <div style={{ 
-                  color: 'rgba(255, 255, 255, 0.8)', 
-                  fontSize: '0.75rem'
-                }}>
-                  {recipe.visibility === 'public' 
-                    ? 'Visible to friends' 
-                    : 'Only visible to you'
-                  }
-                </div>
-              </div>
-            </div>
-          </div>
-          
-          <div style={{
-            display: 'flex',
-            gap: '20px',
-            flexWrap: 'wrap'
-          }}>
-            <div style={{
-              background: 'rgba(255, 255, 255, 0.2)',
-              padding: '12px 20px',
-              borderRadius: '12px',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(255, 255, 255, 0.3)'
-            }}>
-              <div style={{ color: 'rgba(255, 255, 255, 0.9)', fontSize: '0.85rem', marginBottom: '4px' }}>
+              <div style={{ color: '#64748b', fontSize: '0.85rem', marginBottom: '4px', fontWeight: '500' }}>
                 Created
               </div>
-              <div style={{ color: 'white', fontSize: '1rem', fontWeight: '600' }}>
+              <div style={{ color: '#1a202c', fontSize: '1rem', fontWeight: '600' }}>
                 {recipe.createdAt?.toDate?.()?.toLocaleDateString('en-US', {
                   year: 'numeric',
                   month: 'long',
@@ -261,56 +258,63 @@ const RecipeDetail = ({ recipe, onBack, onEdit, user, readOnly }) => {
                 }) || 'Recently'}
               </div>
             </div>
+            
             <div style={{
-              background: 'rgba(255, 255, 255, 0.2)',
-              padding: '12px 20px',
+              background: `linear-gradient(135deg, ${primaryColor}15, ${primaryColor}10)`,
+              padding: '16px 24px',
               borderRadius: '12px',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(255, 255, 255, 0.3)'
+              border: `1px solid ${primaryColor}25`,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              minWidth: '120px'
             }}>
-              <div style={{ color: 'rgba(255, 255, 255, 0.9)', fontSize: '0.85rem', marginBottom: '4px' }}>
+              <div style={{ color: '#64748b', fontSize: '0.85rem', marginBottom: '4px', fontWeight: '500' }}>
                 Serving Size
               </div>
-              <div style={{ color: 'white', fontSize: '1rem', fontWeight: '600' }}>
+              <div style={{ color: '#1a202c', fontSize: '1rem', fontWeight: '600' }}>
                 {recipe.servingSize || '1'}
               </div>
             </div>
             
             <div style={{
-              background: 'rgba(255, 255, 255, 0.2)',
-              padding: '12px 20px',
+              background: `linear-gradient(135deg, ${primaryColor}15, ${primaryColor}10)`,
+              padding: '16px 24px',
               borderRadius: '12px',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(255, 255, 255, 0.3)'
+              border: `1px solid ${primaryColor}25`,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              minWidth: '120px'
             }}>
-              <div style={{ color: 'rgba(255, 255, 255, 0.9)', fontSize: '0.85rem', marginBottom: '4px' }}>
+              <div style={{ color: '#64748b', fontSize: '0.85rem', marginBottom: '4px', fontWeight: '500' }}>
                 Ingredients
               </div>
-              <div style={{ color: 'white', fontSize: '1rem', fontWeight: '600' }}>
+              <div style={{ color: '#1a202c', fontSize: '1rem', fontWeight: '600' }}>
                 {recipe.ingredients?.length || 0} items
               </div>
             </div>
 
             <div style={{
-              background: 'rgba(255, 255, 255, 0.2)',
-              padding: '12px 20px',
+              background: `linear-gradient(135deg, ${primaryColor}15, ${primaryColor}10)`,
+              padding: '16px 24px',
               borderRadius: '12px',
-              backdropFilter: 'blur(10px)',
-              border: '1px solid rgba(255, 255, 255, 0.3)'
+              border: `1px solid ${primaryColor}25`,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              minWidth: '120px'
             }}>
-              <div style={{ color: 'rgba(255, 255, 255, 0.9)', fontSize: '0.85rem', marginBottom: '4px' }}>
+              <div style={{ color: '#64748b', fontSize: '0.85rem', marginBottom: '4px', fontWeight: '500' }}>
                 Category
               </div>
-              <div style={{ color: 'white', fontSize: '1rem', fontWeight: '600' }}>
+              <div style={{ color: '#1a202c', fontSize: '1rem', fontWeight: '600' }}>
                 {getCategoryEmoji(recipe.category)} {getCategoryLabel(recipe.category)}
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Content Section */}
-      <div style={{ padding: '40px' }}>
         {/* Ingredients Section */}
         <div style={{ marginBottom: '50px' }}>
           <div style={{
@@ -769,6 +773,15 @@ function getCategoryLabel(category) {
     dessert: 'Dessert'
   };
   return labelMap[category] || 'Dinner';
+}
+
+// Helper function to format file size
+function formatFileSize(bytes) {
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
 }
 
 export default RecipeDetail;

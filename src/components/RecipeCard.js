@@ -1,17 +1,29 @@
 import React from 'react';
 
 export default function RecipeCard({ recipe, onSelect }) {
+    // Check if recipe has a photo
+    const hasPhoto = recipe.photo && recipe.photo.downloadURL;
+
     return (
         <div
           onClick={() => onSelect(recipe)}
           style={{
-            background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+            background: hasPhoto 
+              ? `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url(${recipe.photo.downloadURL})`
+              : 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat',
             borderRadius: '16px',
             padding: '0',
             cursor: 'pointer',
             transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-            boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
-            border: '1px solid rgba(255, 255, 255, 0.8)',
+            boxShadow: hasPhoto 
+              ? '0 8px 32px rgba(0, 0, 0, 0.2)' 
+              : '0 4px 20px rgba(0, 0, 0, 0.08)',
+            border: hasPhoto 
+              ? '1px solid rgba(255, 255, 255, 0.2)' 
+              : '1px solid rgba(255, 255, 255, 0.8)',
             overflow: 'hidden',
             position: 'relative',
             height: '280px',
@@ -20,205 +32,265 @@ export default function RecipeCard({ recipe, onSelect }) {
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.transform = 'translateY(-8px) scale(1.02)';
-            e.currentTarget.style.boxShadow = '0 20px 40px rgba(0, 0, 0, 0.15)';
+            e.currentTarget.style.boxShadow = hasPhoto 
+              ? '0 20px 48px rgba(0, 0, 0, 0.3)' 
+              : '0 20px 40px rgba(0, 0, 0, 0.15)';
           }}
           onMouseLeave={(e) => {
             e.currentTarget.style.transform = 'translateY(0) scale(1)';
-            e.currentTarget.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.08)';
+            e.currentTarget.style.boxShadow = hasPhoto 
+              ? '0 8px 32px rgba(0, 0, 0, 0.2)' 
+              : '0 4px 20px rgba(0, 0, 0, 0.08)';
           }}
         >
-          {/* Compact top decorative section */}
-          <div style={{
-            height: '60px', // Reduced from 80px
-            background: `linear-gradient(135deg, 
-              ${getRandomGradient(recipe.title)} 0%, 
-              ${getRandomGradient(recipe.title, true)} 100%)`,
-            position: 'relative',
-            overflow: 'hidden'
-          }}>
-            {/* Background decoration */}
+          {/* Photo Attribution Badge (only show if photo exists) */}
+          {hasPhoto && (
             <div style={{
               position: 'absolute',
-              top: '-15px',
-              right: '-15px',
-              width: '40px',
-              height: '40px',
-              background: 'rgba(255, 255, 255, 0.2)',
-              borderRadius: '50%'
-            }} />
-            <div style={{
-              position: 'absolute',
-              bottom: '-10px',
-              left: '-10px',
-              width: '30px',
-              height: '30px',
-              background: 'rgba(255, 255, 255, 0.15)',
-              borderRadius: '50%'
-            }} />
-            
-            {/* Recipe emoji/icon - positioned better */}
-            <div style={{
-              position: 'absolute',
-              bottom: '1px', // Adjusted for smaller header
-              right: '16px',
-              width: '40px', // Slightly smaller
-              height: '40px',
-              background: 'white',
-              borderRadius: '50%',
+              top: '12px',
+              left: '12px',
+              background: 'rgba(255, 255, 255, 0.25)',
+              color: 'white',
+              padding: '6px 12px',
+              borderRadius: '20px',
+              fontSize: '0.75rem',
+              fontWeight: '600',
+              zIndex: 5,
+              backdropFilter: 'blur(10px)',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '20px', // Slightly smaller emoji
-              boxShadow: '0 3px 8px rgba(0, 0, 0, 0.15)'
+              gap: '4px',
+              border: '1px solid rgba(255, 255, 255, 0.2)'
             }}>
-              {getRecipeEmoji(recipe.title)}
+              <span style={{ fontSize: '10px' }}>📸</span>
+              Photo
             </div>
-          </div>
-          
-          {/* Content section - more space for content */}
-          <div style={{ 
-            padding: '20px 18px 16px 18px', // Adjusted padding
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'space-between'
-          }}>
-            {/* Recipe Title */}
-            <div>
-              <h3 style={{ 
-                margin: '0 0 12px 0', 
-                color: '#1a202c',
-                fontSize: '1.25rem', // Slightly smaller but still prominent
-                fontWeight: '700',
-                lineHeight: '1.3',
-                overflow: 'hidden',
-                display: '-webkit-box',
-                whiteSpace: 'nowrap',
-                textOverflow: 'ellipsis',
-                minHeight: '2.4rem',
-                wordBreak: 'break-word'
-              }}>
-                {recipe.title}
-              </h3>
-              
-              {/* Compact Category and Privacy Badges */}
+          )}
+
+          {/* Compact top decorative section (only for non-photo cards) */}
+          {!hasPhoto && (
+            <div style={{
+              height: '60px',
+              background: `linear-gradient(135deg, 
+                ${getRandomGradient(recipe.title)} 0%, 
+                ${getRandomGradient(recipe.title, true)} 100%)`,
+              position: 'relative',
+              overflow: 'hidden'
+            }}>
+              {/* Background decoration */}
               <div style={{
-                display: 'flex',
-                gap: '6px',
-                alignItems: 'center',
-                marginBottom: '10px',
-                flexWrap: 'wrap'
-              }}>
-                {/* Category Badge - Smaller */}
-                <div style={{
-                  padding: '4px 11px', // Reduced padding
-                  background: `linear-gradient(135deg, ${getRandomGradient(recipe.title)}18, ${getRandomGradient(recipe.title, true)}18)`,
-                  borderRadius: '12px', // Smaller border radius
-                  fontSize: '.8rem', // Smaller font
-                  fontWeight: '600',
-                  color: getRandomGradient(recipe.title),
-                  whiteSpace: 'nowrap',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '3px',
-                  border: `1px solid ${getRandomGradient(recipe.title)}25`
-                }}>
-                  <span style={{ fontSize: '8px' }}>{getCategoryEmoji(recipe.category)}</span>
-                  {getCategoryLabel(recipe.category)}
-                </div>
-              </div>
-              
-              {/* Instructions Preview - Compact */}
-              {recipe.instructions && (
-                <p style={{ 
-                  margin: '0 0 14px 0', 
-                  color: '#64748b', 
-                  fontSize: '0.85rem', // Slightly smaller
-                  lineHeight: '1.4',
-                  overflow: 'hidden',
-                  display: '-webkit-box',
-                  WebkitLineClamp: 2,
-                  WebkitBoxOrient: 'vertical',
-                  height: '2.4rem'
-                }}>
-                  {recipe.instructions.length > 90 
-                    ? `${recipe.instructions.substring(0, 90)}...` 
-                    : recipe.instructions
-                  }
-                </p>
-              )}
-            </div>
-            
-            {/* Bottom info section - Compact */}
-            <div>
-              {/* Recipe Stats - More compact */}
-              <div style={{ 
-                display: 'flex', 
-                justifyContent: 'space-between', 
-                alignItems: 'center',
-                marginBottom: '10px'
-              }}>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '5px',
-                  background: 'linear-gradient(135deg, #667eea12, #764ba212)',
-                  padding: '5px 10px', // Smaller padding
-                  borderRadius: '6px'
-                }}>
-                  <span style={{ fontSize: '12px' }}>🥘</span>
-                  <span style={{ 
-                    color: '#667eea', 
-                    fontSize: '0.8rem', // Smaller
-                    fontWeight: '600'
-                  }}>
-                    {recipe.ingredients?.length || 0} ingredients
-                  </span>
-                </div>
-                
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px'
-                }}>
-                  <span style={{ fontSize: '10px', opacity: 0.6 }}>📅</span>
-                  <span style={{ 
-                    fontSize: '0.7rem', // Smaller
-                    color: '#94a3b8',
-                    fontWeight: '500'
-                  }}>
-                    {recipe.createdAt?.toDate?.()?.toLocaleDateString('en-US', {
-                      month: 'short',
-                      day: 'numeric'
-                    }) || 'Recent'}
-                  </span>
-                </div>
-              </div>
-              
-              {/* Click hint - Compact */}
+                position: 'absolute',
+                top: '-15px',
+                right: '-15px',
+                width: '40px',
+                height: '40px',
+                background: 'rgba(255, 255, 255, 0.2)',
+                borderRadius: '50%'
+              }} />
               <div style={{
+                position: 'absolute',
+                bottom: '-10px',
+                left: '-10px',
+                width: '30px',
+                height: '30px',
+                background: 'rgba(255, 255, 255, 0.15)',
+                borderRadius: '50%'
+              }} />
+              
+              {/* Recipe emoji/icon */}
+              <div style={{
+                position: 'absolute',
+                bottom: '1px',
+                right: '16px',
+                width: '40px',
+                height: '40px',
+                background: 'white',
+                borderRadius: '50%',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                gap: '5px',
-                padding: '6px', // Smaller padding
-                borderRadius: '6px',
-                background: 'rgba(102, 126, 234, 0.05)',
-                transition: 'all 0.2s ease'
+                fontSize: '20px',
+                boxShadow: '0 3px 8px rgba(0, 0, 0, 0.15)'
               }}>
-                <span style={{
-                  fontSize: '0.75rem', // Smaller
-                  color: '#667eea',
-                  fontWeight: '500'
+                {getRecipeEmoji(recipe.title)}
+              </div>
+            </div>
+          )}
+          
+          {/* Content section - more space for content */}
+          <div style={{ 
+            padding: hasPhoto ? '0' : '20px 18px 16px 18px',
+            flex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: hasPhoto ? 'flex-end' : 'space-between',
+            position: 'relative'
+          }}>
+            {/* Content container with background for photo cards */}
+            <div style={{
+              ...(hasPhoto && {
+                background: 'linear-gradient(transparent, rgba(0, 0, 0, 0.8))',
+                margin: '-20px',
+                padding: '40px 24px 24px 24px',
+                borderRadius: '0 0 16px 16px'
+              })
+            }}>
+              {/* Recipe Title */}
+              <div>
+                <h3 style={{ 
+                  margin: '0 0 12px 0', 
+                  color: hasPhoto ? 'white' : '#1a202c',
+                  fontSize: '1.25rem',
+                  fontWeight: '700',
+                  lineHeight: '1.3',
+                  overflow: 'hidden',
+                  display: '-webkit-box',
+                  whiteSpace: 'nowrap',
+                  textOverflow: 'ellipsis',
+                  minHeight: '2.4rem',
+                  wordBreak: 'break-word',
+                  textShadow: hasPhoto ? '0 2px 4px rgba(0,0,0,0.8)' : 'none'
                 }}>
-                  View Recipe
-                </span>
-                <span style={{
-                  fontSize: '10px',
-                  color: '#667eea'
+                  {recipe.title}
+                </h3>
+                
+                {/* Compact Category and Privacy Badges */}
+                <div style={{
+                  display: 'flex',
+                  gap: '8px',
+                  alignItems: 'center',
+                  marginBottom: '12px',
+                  flexWrap: 'wrap'
                 }}>
-                  →
-                </span>
+                  {/* Category Badge - Smaller */}
+                  <div style={{
+                    padding: '6px 14px',
+                    background: hasPhoto 
+                      ? 'rgba(255, 255, 255, 0.2)' 
+                      : `linear-gradient(135deg, ${getRandomGradient(recipe.title)}18, ${getRandomGradient(recipe.title, true)}18)`,
+                    borderRadius: '12px',
+                    fontSize: '.8rem',
+                    fontWeight: '600',
+                    color: hasPhoto 
+                      ? 'rgba(255, 255, 255, 0.95)' 
+                      : getRandomGradient(recipe.title),
+                    whiteSpace: 'nowrap',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    border: hasPhoto 
+                      ? '1px solid rgba(255, 255, 255, 0.2)' 
+                      : `1px solid ${getRandomGradient(recipe.title)}25`,
+                    backdropFilter: hasPhoto ? 'blur(10px)' : 'none'
+                  }}>
+                    <span style={{ fontSize: '8px' }}>{getCategoryEmoji(recipe.category)}</span>
+                    {getCategoryLabel(recipe.category)}
+                  </div>
+                </div>
+                
+                {/* Instructions Preview - Compact (only for non-photo cards) */}
+                {recipe.instructions && !hasPhoto && (
+                  <p style={{ 
+                    margin: '0 0 14px 0', 
+                    color: '#64748b', 
+                    fontSize: '0.85rem',
+                    lineHeight: '1.4',
+                    overflow: 'hidden',
+                    display: '-webkit-box',
+                    WebkitLineClamp: 2,
+                    WebkitBoxOrient: 'vertical',
+                    height: '2.4rem'
+                  }}>
+                    {recipe.instructions.length > 90 
+                      ? `${recipe.instructions.substring(0, 90)}...` 
+                      : recipe.instructions
+                    }
+                  </p>
+                )}
+              </div>
+              
+              {/* Bottom info section - Compact */}
+              <div>
+                {/* Recipe Stats - More compact */}
+                <div style={{ 
+                  display: 'flex', 
+                  justifyContent: 'space-between', 
+                  alignItems: 'center',
+                  marginBottom: '12px'
+                }}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    background: hasPhoto 
+                      ? 'rgba(255, 255, 255, 0.15)' 
+                      : 'linear-gradient(135deg, #667eea12, #764ba212)',
+                    padding: '6px 12px',
+                    borderRadius: '8px',
+                    border: hasPhoto ? '1px solid rgba(255, 255, 255, 0.15)' : 'none',
+                    backdropFilter: hasPhoto ? 'blur(10px)' : 'none'
+                  }}>
+                    <span style={{ fontSize: '12px' }}>🥘</span>
+                    <span style={{ 
+                      color: hasPhoto ? 'rgba(255, 255, 255, 0.9)' : '#667eea',
+                      fontSize: '0.8rem',
+                      fontWeight: '600'
+                    }}>
+                      {recipe.ingredients?.length || 0} ingredients
+                    </span>
+                  </div>
+                  
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}>
+                    <span style={{ 
+                      fontSize: '10px', 
+                      opacity: hasPhoto ? 1 : 0.6
+                    }}>📅</span>
+                    <span style={{ 
+                      fontSize: '0.7rem',
+                      color: hasPhoto ? 'rgba(255, 255, 255, 0.8)' : '#94a3b8',
+                      fontWeight: '500'
+                    }}>
+                      {recipe.createdAt?.toDate?.()?.toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric'
+                      }) || 'Recent'}
+                    </span>
+                  </div>
+                </div>
+                
+                {/* Click hint - Compact */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                  padding: '8px 12px',
+                  borderRadius: '8px',
+                  background: hasPhoto 
+                    ? 'rgba(255, 255, 255, 0.15)' 
+                    : 'rgba(102, 126, 234, 0.05)',
+                  transition: 'all 0.2s ease',
+                  border: hasPhoto ? '1px solid rgba(255, 255, 255, 0.2)' : 'none',
+                  backdropFilter: hasPhoto ? 'blur(10px)' : 'none'
+                }}>
+                  <span style={{
+                    fontSize: '0.75rem',
+                    color: hasPhoto ? 'rgba(255, 255, 255, 0.9)' : '#667eea',
+                    fontWeight: '500'
+                  }}>
+                    View Recipe
+                  </span>
+                  <span style={{
+                    fontSize: '10px',
+                    color: hasPhoto ? 'rgba(255, 255, 255, 0.8)' : '#667eea'
+                  }}>
+                    →
+                  </span>
+                </div>
               </div>
             </div>
           </div>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { collection, addDoc, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase/config';
+import PhotoUpload from './PhotoUpload';
 
 const RecipeForm = ({ user, recipe, onCancel, onSave }) => {
   const [title, setTitle] = useState('');
@@ -10,8 +11,8 @@ const RecipeForm = ({ user, recipe, onCancel, onSave }) => {
   const [servingSize, setServingSize] = useState('1');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [photoData, setPhotoData] = useState(null);
 
-  
   // Validation states
   const [touched, setTouched] = useState({
     title: false,
@@ -40,6 +41,7 @@ const RecipeForm = ({ user, recipe, onCancel, onSave }) => {
       setInstructions(recipe.instructions || '');
       setCategory(recipe.category || 'dinner');
       setServingSize(recipe.servingSize || '1');
+      setPhotoData(recipe.photo || null);
     }
   }, [recipe]);
 
@@ -117,6 +119,12 @@ const RecipeForm = ({ user, recipe, onCancel, onSave }) => {
     };
   };
 
+  // Handle photo change
+  const handlePhotoChange = (uploadedPhotoData) => {
+    console.log('Photo data received in RecipeForm:', uploadedPhotoData);
+    setPhotoData(uploadedPhotoData);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -148,6 +156,7 @@ const RecipeForm = ({ user, recipe, onCancel, onSave }) => {
           instructions: instructions.trim(),
           category: category,
           servingSize: servingSize,
+          photo: photoData, // Include photo data
           updatedAt: serverTimestamp()
         };
 
@@ -161,6 +170,7 @@ const RecipeForm = ({ user, recipe, onCancel, onSave }) => {
           instructions: instructions.trim(),
           category: category,
           servingSize: servingSize,
+          photo: photoData, // Include photo data
           createdBy: user.uid,
           createdAt: serverTimestamp()
         };
@@ -175,6 +185,7 @@ const RecipeForm = ({ user, recipe, onCancel, onSave }) => {
       setInstructions('');
       setCategory('dinner');
       setServingSize('1');
+      setPhotoData(null);
       
       if (onSave) onSave();
       
@@ -310,6 +321,20 @@ const RecipeForm = ({ user, recipe, onCancel, onSave }) => {
                 {title.length}/100
               </span>
             </div>
+          </div>
+
+          {/* Photo Upload Section */}
+          <div style={{ marginBottom: '32px' }}>
+            <PhotoUpload
+              photo={photoData}
+              onPhotoChange={handlePhotoChange}
+              userId={user.uid}
+              recipeId={recipe?.id}
+              mode="upload"
+              allowReplace={true}
+              maxSizeMB={5}
+              allowedTypes={['image/jpeg', 'image/png', 'image/webp']}
+            />
           </div>
 
           {/* Meal Category Field */}
