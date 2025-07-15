@@ -545,7 +545,6 @@ const PhotoUpload = ({
         accept={allowedTypes.join(',')}
         onChange={handleFileSelect}
         style={{ display: 'none' }}
-        capture="environment"
       />
 
       {/* Error Display */}
