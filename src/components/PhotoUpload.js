@@ -930,7 +930,7 @@ const PhotoUpload = ({
                 }}
               >
                 <span>📷</span>
-                Take Photo
+                Choose Photo
               </button>
             </div>
           )}
