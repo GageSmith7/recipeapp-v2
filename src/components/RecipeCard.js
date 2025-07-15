@@ -1,8 +1,11 @@
 import React from 'react';
 
 export default function RecipeCard({ recipe, onSelect }) {
-    // Check if recipe has a photo
-    const hasPhoto = recipe.photo && recipe.photo.downloadURL;
+    // Check if recipe has a photo with proper validation
+    const hasPhoto = recipe.photo && recipe.photo.downloadURL && recipe.photo.downloadURL.trim() !== '';
+    
+    // Debug logging
+    console.log('Recipe:', recipe.title, 'Has photo:', hasPhoto, 'Photo data:', recipe.photo);
 
     return (
         <div

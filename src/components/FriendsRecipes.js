@@ -547,6 +547,7 @@ const FriendsRecipes = ({ user, userProfile, onBack }) => {
                       <option value="dinner">🍽️ Dinner</option>
                       <option value="snack">🍿 Snack</option>
                       <option value="dessert">🍰 Dessert</option>
+                      <option value="cocktail">🍸 Cocktail</option>
                     </select>
                   </div>
 
