@@ -1,10 +1,8 @@
 import React from 'react';
 
 export default function RecipeCard({ recipe, onSelect }) {
-    // Check if recipe has a photo with proper validation
     const hasPhoto = recipe.photo && recipe.photo.downloadURL && recipe.photo.downloadURL.trim() !== '';
     
-    // Debug logging
     console.log('Recipe:', recipe.title, 'Has photo:', hasPhoto, 'Photo data:', recipe.photo);
 
     return (
@@ -46,29 +44,7 @@ export default function RecipeCard({ recipe, onSelect }) {
               : '0 4px 20px rgba(0, 0, 0, 0.08)';
           }}
         >
-          {/* Photo Attribution Badge (only show if photo exists) */}
-          {hasPhoto && (
-            <div style={{
-              position: 'absolute',
-              top: '12px',
-              left: '12px',
-              background: 'rgba(255, 255, 255, 0.25)',
-              color: 'white',
-              padding: '6px 12px',
-              borderRadius: '20px',
-              fontSize: '0.75rem',
-              fontWeight: '600',
-              zIndex: 5,
-              backdropFilter: 'blur(10px)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px',
-              border: '1px solid rgba(255, 255, 255, 0.2)'
-            }}>
-              <span style={{ fontSize: '10px' }}>📸</span>
-              Photo
-            </div>
-          )}
+        
 
           {/* Compact top decorative section (only for non-photo cards) */}
           {!hasPhoto && (
@@ -191,7 +167,7 @@ export default function RecipeCard({ recipe, onSelect }) {
                   </div>
                 </div>
                 
-                {/* Instructions Preview - Compact (only for non-photo cards) */}
+                {/* Instructions Preview - Compact */}
                 {recipe.instructions && !hasPhoto && (
                   <p style={{ 
                     margin: '0 0 14px 0', 
@@ -325,14 +301,13 @@ function getRandomGradient(title, secondary = false) {
   for (let i = 0; i < title.length; i++) {
     const char = title.charCodeAt(i);
     hash = ((hash << 5) - hash) + char;
-    hash = hash & hash; // Convert to 32-bit integer
+    hash = hash & hash;
   }
   
   const index = Math.abs(hash) % gradients.length;
   return secondary ? gradients[(index + 1) % gradients.length] : gradients[index];
 }
 
-// Helper function to get category emoji
 function getCategoryEmoji(category) {
   const categoryMap = {
     breakfast: '🌅',
@@ -345,7 +320,6 @@ function getCategoryEmoji(category) {
   return categoryMap[category] || '🍽️';
 }
 
-// Helper function to get category label
 function getCategoryLabel(category) {
   const labelMap = {
     breakfast: 'Breakfast',
@@ -358,7 +332,6 @@ function getCategoryLabel(category) {
   return labelMap[category] || 'Dinner';
 }
 
-// Helper function to get appropriate emoji based on recipe title
 function getRecipeEmoji(title) {
   const titleLower = title.toLowerCase();
   

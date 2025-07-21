@@ -10,9 +10,9 @@ const PhotoUpload = ({
   allowReplace = true,
   maxSizeMB = 5,
   allowedTypes = ['image/jpeg', 'image/png', 'image/webp'],
-  userId, // Required for creating user-specific paths
-  recipeId = null, // Optional - for organizing photos by recipe
-  storagePath = 'recipe-photos' // Customizable storage path
+  userId,
+  recipeId = null,
+  storagePath = 'recipe-photos'
 }) => {
   const [selectedPhoto, setSelectedPhoto] = useState(photo);
   const [photoPreview, setPhotoPreview] = useState(null);
@@ -25,7 +25,7 @@ const PhotoUpload = ({
   const fileInputRef = useRef(null);
   const fileReaderRef = useRef(null);
 
-  // Cleanup FileReader on unmount to prevent memory leaks
+
   useEffect(() => {
     return () => {
       if (fileReaderRef.current) {
@@ -34,7 +34,6 @@ const PhotoUpload = ({
     };
   }, []);
 
-  // Initialize with existing photo data if provided
   useEffect(() => {
     if (photo && typeof photo === 'object' && photo.downloadURL) {
       setUploadedPhotoData(photo);
@@ -48,7 +47,7 @@ const PhotoUpload = ({
     }
   }, [photo]);
 
-  // Generate unique filename with timestamp
+
   const generateFileName = (originalFile) => {
     const timestamp = Date.now();
     const randomId = Math.random().toString(36).substring(2);
@@ -56,7 +55,7 @@ const PhotoUpload = ({
     return `${timestamp}_${randomId}.${fileExtension}`;
   };
 
-  // Create storage path for the file
+
   const createStoragePath = (fileName) => {
     const basePath = `${storagePath}/${userId}`;
     if (recipeId) {
@@ -65,7 +64,7 @@ const PhotoUpload = ({
     return `${basePath}/${fileName}`;
   };
 
-  // File validation function
+
   const validateFile = (file) => {
     console.log('Validating file:', {
       name: file.name,
@@ -74,7 +73,6 @@ const PhotoUpload = ({
       maxSizeBytes: maxSizeMB * 1024 * 1024
     });
 
-    // Check file type
     if (!allowedTypes.includes(file.type)) {
       const allowedExtensions = allowedTypes.map(type => 
         type.split('/')[1].toUpperCase()
@@ -85,7 +83,6 @@ const PhotoUpload = ({
       };
     }
 
-    // Check file size
     const maxSizeBytes = maxSizeMB * 1024 * 1024;
     if (file.size > maxSizeBytes) {
       return {
@@ -94,7 +91,6 @@ const PhotoUpload = ({
       };
     }
 
-    // Check if file is actually an image by trying to create image object
     return new Promise((resolve) => {
       const img = new Image();
       const objectUrl = URL.createObjectURL(file);
@@ -129,10 +125,8 @@ const PhotoUpload = ({
     });
   };
 
-  // Generate preview thumbnail using FileReader
   const generatePreview = (file) => {
     return new Promise((resolve, reject) => {
-      // Abort any existing FileReader operation
       if (fileReaderRef.current) {
         fileReaderRef.current.abort();
       }
@@ -190,7 +184,6 @@ const PhotoUpload = ({
       // Create storage reference
       const storageRef = ref(storage, fullPath);
       
-      // Add metadata
       const metadata = {
         contentType: file.type,
         customMetadata: {
@@ -254,8 +247,7 @@ const PhotoUpload = ({
       console.log('Photo deleted from Firebase Storage successfully');
     } catch (error) {
       console.error('Error deleting photo from Firebase:', error);
-      // Don't throw error here - we still want to clear local state
-      // even if Firebase deletion fails
+
     }
   };
 
