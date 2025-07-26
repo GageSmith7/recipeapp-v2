@@ -8,6 +8,7 @@ import ProfileSetup from './components/ProfileSetup';
 import FriendsRecipes from './components/FriendsRecipes';
 import './App.css';
 import ProfileSettings from './components/ProfileSettings';
+import ShoppingLists from './components/ShoppingLists';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -17,6 +18,7 @@ function App() {
   const [viewProfile, setViewProfile] = useState(false)
   const [loading, setLoading] = useState(true);
   const [pendingRequestsCount, setPendingRequestsCount] = useState(0);
+  const [showShoppingLists, setShowShoppingLists] = useState(false);
 
   // Check if user has a profile
   const checkUserProfile = async (uid) => {
@@ -178,6 +180,14 @@ function App() {
           userProfile={userProfile}
           onBack={handleBackToRecipes}
         />
+      </div>
+    );
+  }
+
+  if (showShoppingLists) {
+    return (
+      <div className="App" style={{ minHeight: '100vh', backgroundColor: '#f8fafc' }}>
+        <ShoppingLists user={user} onBack={() => setShowShoppingLists(false)} />
       </div>
     );
   }
@@ -372,6 +382,40 @@ function App() {
                   {pendingRequestsCount > 9 ? '9+' : pendingRequestsCount}
                 </div>
               )}
+            </button>
+            {/* Shopping Lists Button */}
+            <button
+              onClick={() => setShowShoppingLists(true)}
+              style={{
+                padding: '12px 20px',
+                fontSize: '14px',
+                fontWeight: '600',
+                background: 'rgba(255, 255, 255, 0.15)',
+                color: 'white',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                borderRadius: '12px',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                backdropFilter: 'blur(5px)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                position: 'relative',
+                marginLeft: '8px'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.background = 'rgba(255, 255, 255, 0.25)';
+                e.target.style.transform = 'translateY(-1px)';
+                e.target.style.boxShadow = '0 4px 12px rgba(255, 255, 255, 0.15)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.background = 'rgba(255, 255, 255, 0.15)';
+                e.target.style.transform = 'translateY(0)';
+                e.target.style.boxShadow = 'none';
+              }}
+            >
+              <span>🛒</span>
+              Shopping Lists
             </button>
             
             {/* Sign Out Button */}
