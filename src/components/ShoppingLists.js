@@ -273,7 +273,8 @@ const ShoppingLists = ({ user, onBack }) => {
             padding: '24px',
             marginBottom: '30px',
             boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
-            border: '1px solid rgba(0, 0, 0, 0.05)'
+            border: '1px solid rgba(0, 0, 0, 0.05)',
+            maxWidth: '600px'
           }}>
             <h3 style={{ margin: '0 0 20px 0', color: '#333', fontSize: '18px', fontWeight: '600' }}>
               Create New Shopping List
@@ -299,7 +300,8 @@ const ShoppingLists = ({ user, onBack }) => {
                     borderRadius: '8px',
                     border: '1px solid #ddd',
                     fontSize: '16px',
-                    transition: 'border-color 0.2s ease'
+                    transition: 'border-color 0.2s ease',
+                    boxSizing: 'border-box'
                   }}
                   placeholder="e.g., Weekly Groceries"
                   required
